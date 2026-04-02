@@ -84,7 +84,8 @@ class ND2PlateAcquisitionModel(BaseModel):
 
     path: str
     """
-    Path to the nd2 file, or a folder containing nd2 files.
+    Path to a folder containing nd2 files for each well. Each file must have
+    well information in its filename (e.g. WellB02_..., WellC03_
     """
     plate_name: str | None = None
     """
