@@ -1,12 +1,9 @@
 plates:
-  20250506_124144_018.zarr:
-    wells:
-    - B/02
-    - B/03
-    - C/02
+  20250506_124144_018_WellB02_ChannelSD DAPI- EM_SD GFP - EM_Seq0000.zarr:
+    wells: []
     images:
-      B/02/0:
-        axes:
+      ? ''
+      : axes:
         - t
         - c
         - z
@@ -31,10 +28,7 @@ plates:
         - '511.0'
         types:
           is_3D: false
-        attributes:
-          plate: 20250506_124144_018.zarr
-          well: B02
-          acquisition: 0
+        attributes: {}
         tables:
           FOV_ROI_table:
             rois:
@@ -117,8 +111,11 @@ plates:
                   max: 3864.0
                   hash: 786c8c044771efa347ac845bea21dc23b06cef75f4b6e566f3a8b158908c58f5
                 yx_origin: null
-      B/03/0:
-        axes:
+  20250506_124144_018_WellB03_ChannelSD DAPI- EM_SD GFP - EM_Seq0001.zarr:
+    wells: []
+    images:
+      ? ''
+      : axes:
         - t
         - c
         - z
@@ -143,10 +140,7 @@ plates:
         - '511.0'
         types:
           is_3D: false
-        attributes:
-          plate: 20250506_124144_018.zarr
-          well: B03
-          acquisition: 0
+        attributes: {}
         tables:
           FOV_ROI_table:
             rois:
@@ -229,8 +223,11 @@ plates:
                   max: 2848.0
                   hash: db5c7be05fae870405b50867f378b825692da51cac20e1c94c0b75911fa93865
                 yx_origin: null
-      C/02/0:
-        axes:
+  20250506_124144_018_WellC02_ChannelSD DAPI- EM_SD GFP - EM_Seq0002.zarr:
+    wells: []
+    images:
+      ? ''
+      : axes:
         - t
         - c
         - z
@@ -255,10 +252,7 @@ plates:
         - '511.0'
         types:
           is_3D: false
-        attributes:
-          plate: 20250506_124144_018.zarr
-          well: C02
-          acquisition: 0
+        attributes: {}
         tables:
           FOV_ROI_table:
             rois:

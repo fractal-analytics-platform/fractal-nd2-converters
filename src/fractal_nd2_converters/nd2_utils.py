@@ -63,6 +63,17 @@ class ND2ImageAcquisitionModel(BaseModel):
             return self.image_name
         return self._sanitized_name
 
+    def get_zarr_name(self, nd2_path: Path) -> str:
+        """Get the sanitized zarr name for an nd2 file.
+
+        For folders, appends the sanitized file stem to the image name.
+        For single files, returns the image name directly.
+        """
+        if Path(self.path).is_dir():
+            sanitized_stem = re.sub(r"[^A-Za-z0-9\-_. ]", "_", nd2_path.stem)
+            return self.normalized_image_name + "_" + sanitized_stem
+        return self.normalized_image_name
+
 
 class ND2PlateAcquisitionModel(BaseModel):
     """Model for Nikon ND2 plate acquisitions.
@@ -377,14 +388,10 @@ def parse_nd2_image_acquisition(
         List of TiledImage objects ready for conversion.
     """
     nd2_list = _get_nd2_files(acquisition_model.path)
-    is_folder = Path(acquisition_model.path).is_dir()
 
     all_tiles = []
     for nd2_path in nd2_list:
-        if is_folder:
-            zarr_name = acquisition_model.normalized_image_name + "_" + nd2_path.stem
-        else:
-            zarr_name = acquisition_model.normalized_image_name
+        zarr_name = acquisition_model.get_zarr_name(nd2_path)
         collection = SingleImage(image_path=zarr_name)
 
         tiles = _build_tiles(
