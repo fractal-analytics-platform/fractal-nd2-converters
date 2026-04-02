@@ -178,7 +178,13 @@ def _check_roi_tables(
             if roi_assert.yx_origin is not None:
                 y_origin = getattr(roi, "y_micrometer_original", None)
                 x_origin = getattr(roi, "x_micrometer_original", None)
-                assert (y_origin, x_origin) == roi_assert.yx_origin
+                assert y_origin is not None and x_origin is not None, (
+                    f"ROI {roi_name}: y_micrometer_original or "
+                    "x_micrometer_original not found"
+                )
+                assert np.allclose(
+                    (y_origin, x_origin), roi_assert.yx_origin
+                ), f"ROI {roi_name}: ({y_origin}, {x_origin}) != {roi_assert.yx_origin}"
 
 
 def _check_image_assertions(
