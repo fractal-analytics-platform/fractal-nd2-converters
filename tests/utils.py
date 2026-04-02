@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import yaml
-from ngio import OmeZarrContainer, open_ome_zarr_plate
+from ngio import OmeZarrContainer, open_ome_zarr_container, open_ome_zarr_plate
 from pydantic import BaseModel, Field, model_validator
 
 DATA_DIR = Path(__file__).parent / "data"
@@ -32,7 +32,7 @@ class FingerprintModel(BaseModel):
 class RoiAssertionModel(BaseModel):
     slice_repr: str
     finger_print: FingerprintModel
-    xy_origin: tuple[float, float] | None = None
+    yx_origin: tuple[float, float] | None = None
 
 
 class TableAssertionModel(BaseModel):
@@ -89,7 +89,8 @@ class MultiPlateAssertionModel(BaseModel):
         result = {}
         for plate_path, plate in self.plates.items():
             for image_path, img in plate.images.items():
-                result[f"{plate_path}/{image_path}"] = img.types
+                key = f"{plate_path}/{image_path}" if image_path else plate_path
+                result[key] = img.types
         return result
 
     def aggregated_attributes(
@@ -98,7 +99,8 @@ class MultiPlateAssertionModel(BaseModel):
         result = {}
         for plate_path, plate in self.plates.items():
             for image_path, img in plate.images.items():
-                result[f"{plate_path}/{image_path}"] = img.attributes
+                key = f"{plate_path}/{image_path}" if image_path else plate_path
+                result[key] = img.attributes
         return result
 
 
@@ -118,10 +120,13 @@ def _plate_after_init_checks(
     expected = multi_plate_assertions.expected_parallelization_list_length
     assert parallelization_list == expected
     for plate_name, plate_assert in multi_plate_assertions.plates.items():
-        plate_path = zarr_dir / plate_name
-        plate = open_ome_zarr_plate(plate_path)
-        wells = plate.get_wells().keys()
-        assert set(wells) == set(plate_assert.wells)
+        if plate_assert.wells:
+            plate_path = zarr_dir / plate_name
+            plate = open_ome_zarr_plate(plate_path)
+            wells = plate.get_wells().keys()
+            assert set(wells) == set(plate_assert.wells)
+        else:
+            assert (zarr_dir / plate_name).exists()
 
 
 def _image_list_updates_checks(
@@ -170,10 +175,28 @@ def _check_roi_tables(
             roi_array = image.get_roi_as_numpy(roi)
             fingerprint = FingerprintModel.from_array(roi_array)
             assert fingerprint == roi_assert.finger_print, fingerprint
-            if roi_assert.xy_origin is not None:
+            if roi_assert.yx_origin is not None:
                 y_origin = getattr(roi, "y_micrometer_original", None)
                 x_origin = getattr(roi, "x_micrometer_original", None)
-                assert (y_origin, x_origin) == roi_assert.xy_origin
+                assert (y_origin, x_origin) == roi_assert.yx_origin
+
+
+def _check_image_assertions(
+    ome_zarr_image: OmeZarrContainer,
+    img_assert: ImageAssertionModel,
+):
+    image = ome_zarr_image.get_image()
+    assert image.axes == img_assert.axes
+    assert image.shape == img_assert.shape
+    assert np.allclose(image.pixel_size.tzyx, img_assert.pixelsize)
+    if img_assert.channel_labels:
+        assert ome_zarr_image.channel_labels == list(img_assert.channel_labels)
+    if img_assert.wavelength_ids:
+        assert ome_zarr_image.wavelength_ids == list(img_assert.wavelength_ids)
+    _check_roi_tables(
+        ome_zarr_image=ome_zarr_image,
+        image_assertions=img_assert,
+    )
 
 
 def _post_compute_checks(
@@ -181,22 +204,24 @@ def _post_compute_checks(
 ):
     for plate_name, plate_assert in multi_plate_assertions.plates.items():
         plate_path = zarr_dir / plate_name
-        plate = open_ome_zarr_plate(plate_path)
-        for image_path, ome_zarr_image in plate.get_images().items():
-            assert image_path in plate_assert.images
-            img_assert = plate_assert.images[image_path]
-            image = ome_zarr_image.get_image()
-            assert image.axes == img_assert.axes
-            assert image.shape == img_assert.shape
-            assert np.allclose(image.pixel_size.tzyx, img_assert.pixelsize)
-            if img_assert.channel_labels:
-                assert ome_zarr_image.channel_labels == list(img_assert.channel_labels)
-            if img_assert.wavelength_ids:
-                assert ome_zarr_image.wavelength_ids == list(img_assert.wavelength_ids)
-            _check_roi_tables(
-                ome_zarr_image=ome_zarr_image,
-                image_assertions=img_assert,
-            )
+        if plate_assert.wells:
+            plate = open_ome_zarr_plate(plate_path)
+            for image_path, ome_zarr_image in plate.get_images().items():
+                assert image_path in plate_assert.images
+                _check_image_assertions(ome_zarr_image, plate_assert.images[image_path])
+        else:
+            ome_zarr_image = open_ome_zarr_container(plate_path, mode="r")
+            assert "" in plate_assert.images
+            _check_image_assertions(ome_zarr_image, plate_assert.images[""])
+
+
+def _is_plate_zarr(zarr_path: Path) -> bool:
+    """Check whether a zarr directory is an HCS plate or a standalone image."""
+    try:
+        plate = open_ome_zarr_plate(zarr_path)
+        return bool(plate.get_wells())
+    except Exception:
+        return False
 
 
 def _generate_snapshot(
@@ -220,11 +245,18 @@ def _generate_snapshot(
     all_plates = {}
     for plate_name in plate_names:
         plate_path = zarr_dir / plate_name
-        ome_zarr_plate = open_ome_zarr_plate(plate_path)
-        wells = list(ome_zarr_plate.get_wells().keys())
-        images_dict = {}
+        is_plate = _is_plate_zarr(plate_path)
 
-        for img_path, ome_zarr_image in ome_zarr_plate.get_images().items():
+        if is_plate:
+            ome_zarr_plate = open_ome_zarr_plate(plate_path)
+            wells = list(ome_zarr_plate.get_wells().keys())
+            image_iter = list(ome_zarr_plate.get_images().items())
+        else:
+            wells = []
+            image_iter = [("", open_ome_zarr_container(plate_path, mode="r"))]
+
+        images_dict = {}
+        for img_path, ome_zarr_image in image_iter:
             image = ome_zarr_image.get_image()
             entry: dict = {
                 "axes": list(image.axes),
@@ -234,7 +266,7 @@ def _generate_snapshot(
                 "wavelength_ids": ome_zarr_image.wavelength_ids,
             }
 
-            full_path = f"{plate_name}/{img_path}"
+            full_path = f"{plate_name}/{img_path}" if img_path else plate_name
             if full_path in updates_by_image:
                 upd = updates_by_image[full_path]
                 if "types" in upd:
@@ -259,7 +291,7 @@ def _generate_snapshot(
                         y_origin = getattr(roi, "y_micrometer_original", None)
                         x_origin = getattr(roi, "x_micrometer_original", None)
                         if y_origin is not None and x_origin is not None:
-                            yx_origin = (y_origin, x_origin)
+                            yx_origin = [y_origin, x_origin]
                         else:
                             yx_origin = None
                         rois_dict[roi.name] = {
