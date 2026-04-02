@@ -319,7 +319,7 @@
             "description": "Model for Nikon ND2 plate acquisitions.",
             "properties": {
               "path": {
-                "description": "Path to the nd2 file, or a folder containing nd2 files.",
+                "description": "Path to a folder containing nd2 files for each well. Each file must have\nwell information in its filename (e.g. WellB02_..., WellC03_",
                 "title": "Path",
                 "type": "string"
               },
