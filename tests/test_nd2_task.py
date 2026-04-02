@@ -2,18 +2,18 @@ from pathlib import Path
 
 import pytest
 
+from fractal_nd2_converters.compute_task_image_in_plate import (
+    compute_task_image_in_plate,
+)
 from fractal_nd2_converters.init_task_convert_nd2_plate import (
     init_task_convert_nd2_plate,
 )
-from fractal_nd2_converters.init_task_convert_nd2_single_image import (
-    init_task_convert_nd2_single_image,
+
+from .utils import DATA_DIR, SNAPSHOT_DIR, run_converter_test
+
+ND2_PLATE_DATA = (
+    DATA_DIR / "WellPlate_Jobs_3w6p2c0z0t_overlap" / "20250506_124144_018"
 )
-
-from .utils import DATA_DIR, run_converter_test
-
-TESTS_DIR = Path(__file__).parent
-SNAPSHOT_DIR = TESTS_DIR / "snapshots"
-ND2_DATA_DIR = DATA_DIR / "WellPlate_Jobs_3w6p2c0z0t_overlap"
 
 
 @pytest.mark.parametrize(
@@ -23,7 +23,7 @@ ND2_DATA_DIR = DATA_DIR / "WellPlate_Jobs_3w6p2c0z0t_overlap"
             {
                 "acquisitions": [
                     {
-                        "path": f"{ND2_DATA_DIR}/20250506_124144_018",
+                        "path": str(ND2_PLATE_DATA),
                         "acquisition_id": 0,
                     }
                 ]
@@ -32,7 +32,7 @@ ND2_DATA_DIR = DATA_DIR / "WellPlate_Jobs_3w6p2c0z0t_overlap"
         ),
     ],
 )
-def test_convert_nd2_plate(
+def test_nd2_plate(
     tmp_path: Path,
     init_task_kwargs: dict,
     snapshot_name: str,
@@ -42,30 +42,7 @@ def test_convert_nd2_plate(
         tmp_path=tmp_path,
         init_task_fn=init_task_convert_nd2_plate,
         init_task_kwargs=init_task_kwargs,
+        compute_task_fn=compute_task_image_in_plate,
         snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
-        update_snapshots=update_snapshots,
-    )
-
-
-def test_convert_nd2_single(
-    tmp_path: Path,
-    update_snapshots: bool,
-):
-    nd2_file = (
-        f"{ND2_DATA_DIR}/20250506_124144_018/"
-        "WellB02_ChannelSD DAPI- EM,SD GFP - EM_Seq0000.nd2"
-    )
-    run_converter_test(
-        tmp_path=tmp_path,
-        init_task_fn=init_task_convert_nd2_single_image,
-        init_task_kwargs={
-            "acquisitions": [
-                {
-                    "path": nd2_file,
-                    "image_name": "single_wellB02",
-                }
-            ]
-        },
-        snapshot_path=SNAPSHOT_DIR / "nd2_single_1i2c.yaml",
         update_snapshots=update_snapshots,
     )
