@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 
 class ND2ImageAcquisitionModel(BaseModel):
-    """Model for Nikon ND2 single image acquisitions.
+    """Model for Nikon ND2 non-plate acquisitions.
 
     Accepts a single .nd2 file or a folder of .nd2 files that do not
     follow a plate layout (no well information in filenames).
@@ -85,7 +85,7 @@ class ND2PlateAcquisitionModel(BaseModel):
     path: str
     """
     Path to a folder containing nd2 files for each well. Each file must have
-    well information in its filename (e.g. WellB02_..., WellC03_
+    well information in its filename (e.g. WellB02_..., WellC03_...).
     """
     plate_name: str | None = None
     """
