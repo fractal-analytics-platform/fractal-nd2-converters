@@ -23,8 +23,6 @@ from ome_zarr_converters_tools import (
 from ome_zarr_converters_tools.models._loader import ImageLoaderInterface
 from pydantic import BaseModel, Field
 
-from fractal_nd2_converters.color_utils import wavelength_to_default_color
-
 logger = logging.getLogger(__name__)
 
 
@@ -173,6 +171,11 @@ class _ND2Metadata(BaseModel):
     positions: list[tuple[str, float, float, int | None]]
 
 
+def _color_to_hex(color) -> str:
+    """Convert nd2 Color object to 6-character hex string (e.g., '0000FF')."""
+    return f"{color.r:02X}{color.g:02X}{color.b:02X}"
+
+
 def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
     """Parse metadata from an ND2 file.
 
@@ -204,7 +207,7 @@ def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
             ChannelInfo(
                 channel_label=ch.channel.name,
                 wavelength_id=str(ch.channel.emissionLambdaNm),
-                colors=wavelength_to_default_color(float(ch.channel.emissionLambdaNm)),
+                colors=_color_to_hex(ch.channel.color),
             )
             for ch in nd2file.metadata.channels
         ]
