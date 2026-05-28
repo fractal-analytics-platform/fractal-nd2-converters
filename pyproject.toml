@@ -87,6 +87,10 @@ docstring-code-format = true
 docstring-code-line-length = 89
 skip-magic-trailing-comma = false # default is false
 
+[tool.ty.environment]
+python = ".pixi/envs/dev"
+
+
 [tool.pytest.ini_options]
 minversion = "7.0"
 testpaths = ["tests"]
