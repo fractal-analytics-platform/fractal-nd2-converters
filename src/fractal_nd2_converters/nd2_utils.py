@@ -154,7 +154,11 @@ class nd2Loader(ImageLoaderInterface):
         if tile_data.dims != ("T", "C", "Z", "Y", "X"):
             tile_data = tile_data.transpose("T", "C", "Z", "Y", "X")
 
-        return tile_data.data.compute()
+        arr = tile_data.data.compute()
+        # Squeeze T when T=1 to match axes from default_axes_builder(is_time_series=False)
+        if arr.shape[0] == 1:
+            arr = arr[0]
+        return arr
 
     def find_data_type(self, resource: Any = None) -> str:
         """Return the dtype without loading the full array."""
