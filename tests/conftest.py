@@ -1,84 +1,43 @@
 """Test configuration for fractal-nd2-converters."""
 
-import hashlib
 import logging
-import os
-import urllib.request
 import zipfile
 from pathlib import Path
 
 import pytest
+from ome_zarr_converters_tools import ConverterOptions, OmeZarrOptions
+from ome_zarr_converters_tools.models._converter_options import BackendType
 
 logger = logging.getLogger(__name__)
 
-DATA_DIR = Path(__file__).parent / "data"
-LOCAL_DATA_DIR = DATA_DIR / "local"
+_DATA_EXTENDED_DIR = Path(__file__).parent / "data-extended" / "Nikon-ND2"
 
-ZENODO_RECORD_URL = "https://zenodo.org/api/records/15411420/files"
-ZENODO_FILES = {
-    "WellPlate_Jobs_3w6p2c0z0t_overlap.zip": {
-        "md5": "cef8298f9722532cc47e962b674b127c",
-    },
+# zip filename → canonical directory name under data-extended/Nikon-ND2/raw/
+LOCAL_ZIPS = {
+    "WellPlate_Jobs_3w2p2c0z0t.zip": "hcs_3w2p2c0z0t",
+    "WellPlate_Jobs_3w2p2c0z6t.zip": "hcs_3w2p2c0z6t",
+    "WellPlate_Jobs_3w2p2c3z0t.zip": "hcs_3w2p2c3z0t",
+    "ND_Acquisitions_nd2.zip": "nd_acq",
 }
 
-# Local test datasets (not on Zenodo). Checked out from env var or a known
-# developer path. Tests that require these are skipped when the source isn't
-# found.
-_DEFAULT_LOCAL_TBH = Path("~/data/Converters_Test_Data_TODO/Nikon-nd2-TBH").expanduser()
-LOCAL_TBH_DIR = Path(os.environ.get("ND2_LOCAL_TEST_DATA", str(_DEFAULT_LOCAL_TBH)))
 
-LOCAL_ZIPS = [
-    "WellPlate_Jobs_3w2p2c0z0t.zip",
-    "WellPlate_Jobs_3w2p2c0z0t_splitP.zip",
-    "WellPlate_Jobs_3w2p2c0z6t.zip",
-    "WellPlate_Jobs_3w2p2c3z0t.zip",
-    "ND_Acquisitions_nd2.zip",
-]
-
-
-def _download_zenodo_data() -> None:
-    """Download and extract test data from Zenodo if not already present."""
-    for filename, meta in ZENODO_FILES.items():
-        extracted_dir = DATA_DIR / filename.replace(".zip", "")
-        if extracted_dir.exists():
-            return
-
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        zip_path = DATA_DIR / filename
-        url = f"{ZENODO_RECORD_URL}/{filename}/content"
-
-        logger.info(f"Downloading {filename} from Zenodo...")
-        urllib.request.urlretrieve(url, zip_path)
-
-        # Verify MD5
-        md5 = hashlib.md5(zip_path.read_bytes()).hexdigest()
-        if md5 != meta["md5"]:
-            zip_path.unlink()
-            raise RuntimeError(
-                f"MD5 mismatch for {filename}: "
-                f"expected {meta['md5']}, got {md5}"
-            )
-
-        # Extract and remove zip
-        logger.info(f"Extracting {filename}...")
-        with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(DATA_DIR)
-        zip_path.unlink()
-
-
-def _extract_local_data() -> None:
-    """Extract local TBH test zips to tests/data/local/ if present."""
-    if not LOCAL_TBH_DIR.exists():
+def _extract_extended_data() -> None:
+    """Extract local TBH zips from data-extended/Nikon-ND2/ into its raw/ subdir."""
+    if not _DATA_EXTENDED_DIR.exists():
         return
-    LOCAL_DATA_DIR.mkdir(parents=True, exist_ok=True)
-    for filename in LOCAL_ZIPS:
-        zip_path = LOCAL_TBH_DIR / filename
-        extracted_dir = LOCAL_DATA_DIR / filename.replace(".zip", "")
-        if not zip_path.exists() or extracted_dir.exists():
+    raw_dir = _DATA_EXTENDED_DIR / "raw"
+    raw_dir.mkdir(exist_ok=True)
+    for zip_name, canonical_name in LOCAL_ZIPS.items():
+        zip_path = _DATA_EXTENDED_DIR / zip_name
+        target_dir = raw_dir / canonical_name
+        if not zip_path.exists() or target_dir.exists():
             continue
-        logger.info(f"Extracting local test data: {filename}...")
+        logger.info(f"Extracting extended test data: {zip_name}...")
         with zipfile.ZipFile(zip_path, "r") as zf:
-            zf.extractall(LOCAL_DATA_DIR)
+            zf.extractall(raw_dir)
+        vendor_dir = raw_dir / zip_name.replace(".zip", "")
+        if vendor_dir.exists():
+            vendor_dir.rename(target_dir)
 
 
 def pytest_addoption(parser):
@@ -88,12 +47,28 @@ def pytest_addoption(parser):
         default=False,
         help="Regenerate assertion snapshot YAMLs",
     )
+    parser.addoption(
+        "--extended",
+        action="store_true",
+        default=False,
+        help="Run extended tests requiring large local test datasets",
+    )
 
 
 def pytest_configure(config):
-    """Prepare test data before test collection."""
-    _download_zenodo_data()
-    _extract_local_data()
+    """Prepare test data and register markers before test collection."""
+    config.addinivalue_line(
+        "markers", "extended: mark test as requiring the extended test datasets"
+    )
+    _extract_extended_data()
+
+
+def pytest_collection_modifyitems(config, items):
+    if not config.getoption("--extended"):
+        skip_marker = pytest.mark.skip(reason="Pass --extended to run extended tests")
+        for item in items:
+            if "extended" in item.keywords:
+                item.add_marker(skip_marker)
 
 
 @pytest.fixture
@@ -102,8 +77,9 @@ def update_snapshots(request):
 
 
 @pytest.fixture
-def local_data_available():
-    """True when local TBH test datasets have been extracted."""
-    return LOCAL_TBH_DIR.exists() and any(
-        (LOCAL_DATA_DIR / z.replace(".zip", "")).exists() for z in LOCAL_ZIPS
+def converter_options():
+    return ConverterOptions(
+        omezarr_options=OmeZarrOptions(
+            ngff_version="0.5", table_backend=BackendType.CSV
+        )
     )
