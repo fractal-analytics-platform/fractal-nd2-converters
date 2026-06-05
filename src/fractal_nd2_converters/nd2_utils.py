@@ -155,7 +155,7 @@ class nd2Loader(ImageLoaderInterface):
             tile_data = tile_data.transpose("T", "C", "Z", "Y", "X")
 
         arr = tile_data.data.compute()
-        # Squeeze T when T=1 to match axes from default_axes_builder(is_time_series=False)
+        # Squeeze T=1 to align with default_axes_builder(is_time_series=False)
         if arr.shape[0] == 1:
             arr = arr[0]
         return arr
@@ -180,8 +180,8 @@ class _ND2Metadata(BaseModel):
 
 
 def _color_to_hex(color) -> str:
-    """Convert nd2 Color object to 6-character hex string (e.g., '0000FF')."""
-    return f"{color.r:02X}{color.g:02X}{color.b:02X}"
+    """Convert nd2 Color object to hex color string (e.g., '#0000FF')."""
+    return f"#{color.r:02X}{color.g:02X}{color.b:02X}"
 
 
 def _parse_nd2_metadata(
@@ -231,7 +231,7 @@ def _parse_nd2_metadata(
             ChannelInfo(
                 channel_label=ch.channel.name,
                 wavelength_id=str(ch.channel.emissionLambdaNm),
-                colors=_color_to_hex(ch.channel.color),
+                color=_color_to_hex(ch.channel.color),
             )
             for ch in nd2file.metadata.channels
         ]

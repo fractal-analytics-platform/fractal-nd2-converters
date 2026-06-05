@@ -20,8 +20,28 @@ from .utils import DATA_EXTENDED_DIR, run_converter_test
 RAW_DIR = DATA_EXTENDED_DIR / "raw"
 SNAPSHOT_DIR = DATA_EXTENDED_DIR / "snapshots"
 
-_PLATE_DATASETS = []
-_SINGLE_IMAGE_DATASETS = []
+_PLATE_DATASETS = [
+    ("hcs_3w2p2c1z1t", "20250506_123408_112", "hcs_3w2p2c1z1t"),
+    ("hcs_3w2p2c1z6t", "20250506_124539_026", "hcs_3w2p2c1z6t"),
+    ("hcs_3w2p2c3z1t", "20250506_124350_001", "hcs_3w2p2c3z1t"),
+    ("hcs_3w2p2c1z1t_SplitP", "20250506_123741_693", "hcs_3w2p2c1z1t_SplitP"),
+    ("hcs_3w6p2c1z1t_10overlap", "20250506_124144_018", "hcs_3w6p2c1z1t_10overlap"),
+]
+_SINGLE_IMAGE_DATASETS = [
+    ("img_1p1c1z1t_noND", "img_1p1c1z1t_noND.nd2", "img_1p1c1z1t_noND"),
+    ("img_1p1c1z1t", "img_1p1c1z1t.nd2", "img_1p1c1z1t"),
+    ("img_1p1c1z1t_LI1x1", "img_1p1c1z1t_LI1x1.nd2", "img_1p1c1z1t_LI1x1"),
+    ("img_1p2c1z1t", "img_1p2c1z1t.nd2", "img_1p2c1z1t"),
+    ("img_1p2c3z1t", "img_1p2c3z1t.nd2", "img_1p2c3z1t"),
+    ("img_1p2c3z1t_zlambda", "img_1p2c3z1t_zlambda.nd2", "img_1p2c3z1t_zlambda"),
+    ("img_1p2c1z1t_LI2x3", "img_1p2c1z1t_LI2x3.nd2", "img_1p2c1z1t_LI2x3"),
+    ("img_1p2c3z1t_LI2x3", "img_1p2c3z1t_LI2x3.nd2", "img_1p2c3z1t_LI2x3"),
+    ("img_6p2c1z1t", "img_6p2c1z1t.nd2", "img_6p2c1z1t"),
+    ("img_6p2c3z1t", "img_6p2c3z1t.nd2", "img_6p2c3z1t"),
+    ("img_2p2c1z1t_LI2x3", "img_2p2c1z1t_LI2x3.nd2", "img_2p2c1z1t_LI2x3"),
+    ("img_2p2c1z4t_2sint", "img_2p2c1z4t_2sint.nd2", "img_2p2c1z4t_2sint"),
+    ("img_2p2c1z4t_5sint", "img_2p2c1z4t_5sint.nd2", "img_2p2c1z4t_5sint"),
+]
 
 
 @pytest.mark.extended

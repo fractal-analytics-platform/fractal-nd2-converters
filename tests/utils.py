@@ -6,7 +6,7 @@ from typing import Literal
 import numpy as np
 import yaml
 from ngio import OmeZarrContainer, open_ome_zarr_container, open_ome_zarr_plate
-from ome_zarr_converters_tools import ConverterOptions, OverwriteMode
+from ome_zarr_converters_tools import ConverterOptions
 from pydantic import BaseModel, Field, model_validator
 
 DATA_DIR = Path(__file__).parent / "data" / "Nikon-ND2"
