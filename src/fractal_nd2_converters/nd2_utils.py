@@ -223,6 +223,7 @@ def _parse_nd2_metadata(
                     scale_t = params.periodDiff.avg / 1000.0
 
         # camera transformation matrix
+        # Note: this assumes the same transform applies to all channels
         transform = nd2file.metadata.channels[0].volume.cameraTransformationMatrix
         transform = np.array(transform).reshape(2, 2)
 
@@ -262,8 +263,12 @@ def _parse_nd2_metadata(
         else:
             fov_name = fov_name_override if fov_name_override is not None else "FOV_0"
             pnt = nd2file.frame_metadata(0).channels[0].position
+            xy = np.dot(
+                transform,
+                [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
+            )
             positions.append(
-                (fov_name, pnt.stagePositionUm.x, pnt.stagePositionUm.y, None)
+                (fov_name, xy[0], -xy[1], None)
             )
 
     return _ND2Metadata(
