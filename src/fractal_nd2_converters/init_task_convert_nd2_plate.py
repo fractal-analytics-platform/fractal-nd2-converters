@@ -51,9 +51,7 @@ def init_task_convert_nd2_plate(
         if not _tiled_images:
             logger.warning(f"No images found in {acq.path}")
             continue
-        logger.info(
-            f"Found {len(_tiled_images)} images in acquisition {acq.path}"
-        )
+        logger.info(f"Found {len(_tiled_images)} images in acquisition {acq.path}")
         tiled_images.extend(_tiled_images)
 
     if not tiled_images:
@@ -78,6 +76,4 @@ def init_task_convert_nd2_plate(
 if __name__ == "__main__":
     from fractal_task_tools.task_wrapper import run_fractal_task
 
-    run_fractal_task(
-        task_function=init_task_convert_nd2_plate, logger_name=logger.name
-    )
+    run_fractal_task(task_function=init_task_convert_nd2_plate, logger_name=logger.name)
