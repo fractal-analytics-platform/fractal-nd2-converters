@@ -12,6 +12,18 @@ source = "vcs"
 [tool.hatch.build.targets.wheel]
 packages = ["src/fractal_nd2_converters"]
 
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "tests",
+    "docs",
+    "data",
+    "examples",
+    "notebooks",
+    ".github",
+    "**/*.ipynb_checkpoints",
+    "**/*.ipynb",
+]
+
 
 # Project metadata (see https://peps.python.org/pep-0621)
 [project]
@@ -48,6 +60,7 @@ dev = [
     "xmltodict",
 ]
 test = ["pytest", "pytest-cov", "devtools", "jsonschema"]
+docs = ["mkdocs-material", "mike"]
 
 # https://docs.astral.sh/ruff
 [tool.ruff]
@@ -124,6 +137,7 @@ fractal-nd2-converters = { path = ".", editable = true }
 default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
+docs = { features = ["docs"], solve-group = "default" }
 
 # Required Python version and dependencies
 [tool.pixi.tasks]
