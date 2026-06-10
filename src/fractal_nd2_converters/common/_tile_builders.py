@@ -83,6 +83,8 @@ def _parse_nd2_metadata(
 
         # camera transformation matrix
         # Note: this assumes the same transform applies to all channels
+        if not nd2file.metadata.channels:
+            raise ValueError("No channel metadata found in ND2 file")
         transform = nd2file.metadata.channels[0].volume.cameraTransformationMatrix
         transform = np.array(transform).reshape(2, 2)
 
@@ -113,7 +115,8 @@ def _parse_nd2_metadata(
                     f"The nd2 file {nd2_path} contains multiple positions, "
                     "but no XYPosLoop was found in metadata."
                 )
-            for p, pnt in enumerate(loops["XYPosLoop"].parameters.points):
+            points = loops["XYPosLoop"].parameters.points  # type: ignore
+            for p, pnt in enumerate(points):
                 xy = np.dot(
                     transform,
                     [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
@@ -121,7 +124,10 @@ def _parse_nd2_metadata(
                 positions.append((f"FOV_{p}", xy[0], -xy[1], p))
         else:
             fov_name = fov_name_override if fov_name_override is not None else "FOV_0"
-            pnt = nd2file.frame_metadata(0).channels[0].position
+            if not nd2file.metadata.channels:
+                raise ValueError("No channel metadata found in ND2 file")
+            channel = nd2file.metadata.channels[0]
+            pnt = channel.position  # type: ignore
             xy = np.dot(
                 transform,
                 [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
