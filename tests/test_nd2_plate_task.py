@@ -2,12 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from fractal_nd2_converters.compute_task_image_in_plate import (
-    compute_task_image_in_plate,
-)
-from fractal_nd2_converters.init_task_convert_nd2_plate import (
-    init_task_convert_nd2_plate,
-)
+from fractal_nd2_converters import convert_nd2_plate
 
 from .utils import DATA_DIR, SNAPSHOT_DIR, run_converter_test
 
@@ -40,9 +35,8 @@ def test_nd2_plate(
 ):
     run_converter_test(
         tmp_path=tmp_path,
-        init_task_fn=init_task_convert_nd2_plate,
-        init_task_kwargs=init_task_kwargs,
-        compute_task_fn=compute_task_image_in_plate,
+        api_fn=convert_nd2_plate,
+        api_kwargs=init_task_kwargs,
         snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
         update_snapshots=update_snapshots,
         converter_options=converter_options,

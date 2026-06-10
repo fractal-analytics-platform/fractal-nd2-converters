@@ -267,9 +267,7 @@ def _parse_nd2_metadata(
                 transform,
                 [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
             )
-            positions.append(
-                (fov_name, xy[0], -xy[1], None)
-            )
+            positions.append((fov_name, xy[0], -xy[1], None))
 
     return _ND2Metadata(
         shape_x=shape_x,

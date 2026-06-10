@@ -9,7 +9,7 @@ from ome_zarr_converters_tools import (
 )
 from pydantic import validate_call
 
-from fractal_nd2_converters.nd2_utils import (
+from fractal_nd2_converters._nd2_utils import (
     ND2PlateAcquisitionModel,
     parse_nd2_plate_acquisition,
 )

@@ -122,8 +122,7 @@ ENV/
 # Test data: raw inputs (downloaded/extracted) and zarr outputs are gitignored;
 # snapshots/ subdirs are git-tracked for basic tests, gitignored for extended.
 tests/data/*/output/
-tests/data-extended/*/snapshots/
-tests/data-extended/*/output/
+tests/data-extended
 
 # Claude
 .claude/

@@ -9,10 +9,7 @@ from ome_zarr_converters_tools import (
 )
 from pydantic import validate_call
 
-# Import for side effect: registers the SingleImage collection setup handler
-# with ome_zarr_converters_tools.
-import fractal_nd2_converters._setup_single_image  # noqa: F401
-from fractal_nd2_converters.nd2_utils import (
+from fractal_nd2_converters._nd2_utils import (
     ND2ImageAcquisitionModel,
     parse_nd2_image_acquisition,
 )

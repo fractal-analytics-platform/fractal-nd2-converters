@@ -11,7 +11,7 @@ from ome_zarr_converters_tools import (
 )
 from pydantic import validate_call
 
-from fractal_nd2_converters.nd2_utils import nd2Loader
+from fractal_nd2_converters._nd2_utils import nd2Loader
 
 logger = logging.getLogger(__name__)
 
