@@ -12,8 +12,8 @@
       ],
       "docs_info": "### Purpose\n- Convert a folder of Nikon .nd2 files belonging to a plate acquisition to an OME-Zarr plate.\n\n### Outputs\n- An OME-Zarr plate.\n\n### Limitations\n- This task has been tested on a limited set of acquisitions (see https://zenodo.org/records/15411420). It may not work on all Nikon .nd2 acquisitions.\n- See below for more detailed input expectations.\n\n### Expected inputs\nThe following input layout is supported. (The names in curly braces `{}` can be freely chosen by the user.)\n\n- Folder of nd2 files belonging to a plate acquisition\n\t- acquisition path input:\n\t\t```text\n\t\t.../{folder}\n\t\t----/{prefix1}WellA01{suffix1}.nd2\n\t\t----/{prefix2}WellC02{suffix2}.nd2\n\t\t...\n\t\t```\n\t- output: OME-Zarr plate\n\t- Note:\n\t\t- This works for files generated with the standard plate acquisition JOBS script at the ZMB Nikon Spinning Disk\n\t\t- The filenames MUST contain `Well` followed by the well name. Valid options for well names are e.g. `A1`, `A01`\n\t\t- If there are multiple files corresponding to the same well, they will be treated as separate positions withing the well\n\t\t- If there are other .nd2 files in the folder that do not adhere to this naming convention, they will be ignored",
       "type": "converter_compound",
-      "executable_non_parallel": "init_task_convert_nd2_plate.py",
-      "executable_parallel": "compute_task_image_in_plate.py",
+      "executable_non_parallel": "nd2_plate/convert_nd2_plate_init_task.py",
+      "executable_parallel": "common/image_in_plate_compute_task.py",
       "meta_non_parallel": {
         "cpus_per_task": 1,
         "mem": 4000
@@ -1013,7 +1013,7 @@
           "acquisitions"
         ],
         "type": "object",
-        "title": "InitTaskConvertNd2Plate"
+        "title": "ConvertNd2PlateInitTask"
       },
       "args_schema_parallel": {
         "$defs": {
@@ -1608,12 +1608,12 @@
           "zarr_url": {
             "title": "Zarr Url",
             "type": "string",
-            "description": "URL to the OME-Zarr file."
+            "description": "URL to the OME-Zarr image to populate."
           },
           "init_args": {
             "$ref": "#/$defs/ConvertParallelInitArgs",
             "title": "Init Args",
-            "description": "Arguments for the compute task."
+            "description": "Arguments from the init task."
           }
         },
         "required": [
@@ -1621,7 +1621,7 @@
           "init_args"
         ],
         "type": "object",
-        "title": "ComputeTaskImageInPlate"
+        "title": "ImageInPlateComputeTask"
       }
     },
     {
@@ -1635,8 +1635,8 @@
       ],
       "docs_info": "### Purpose\n- Convert a Nikon .nd2 file, or a folder of .nd2 files to OME-Zarr image(s).\n\n### Outputs\n- One or more OME-Zarr images.\n\n### Limitations\n- This task has been tested on a limited set of acquisitions (see https://zenodo.org/records/15411420). It may not work on all Nikon .nd2 acquisitions.\n- If the positions are split into different files with e.g. the 'Split Multipoints' option, they will be converted to individual images.\n- See below for more detailed input expectations.\n\n### Expected inputs\nThe following input layouts are supported. (The names in curly braces `{}` can be freely chosen by the user.)\n\n- Single file acquisition\n\t- acquisition path input:\n\t\t```text\n\t\t.../{filename}.nd2\n\t\t```\n\t- output: single OME-Zarr image\n\n- Folder of single file acquisitions\n\t- acquisition path input:\n\t\t```text\n\t\t.../{folder}\n\t\t----/{filename1}.nd2\n\t\t----/{filename2}.nd2\n\t\t...\n\t\t```\n\t- output: multiple OME-Zarr images\n\t- Note:\n\t\t- For plate acquisitions where filenames contain `Well` (e.g. `WellA01{filename}.nd2`), use the \"Convert Nikon ND2 Plate to OME-Zarr\" task instead",
       "type": "converter_compound",
-      "executable_non_parallel": "init_task_convert_nd2_single_image.py",
-      "executable_parallel": "compute_task_single_image.py",
+      "executable_non_parallel": "nd2_image/convert_nd2_image_init_task.py",
+      "executable_parallel": "common/single_image_compute_task.py",
       "meta_non_parallel": {
         "cpus_per_task": 1,
         "mem": 4000
@@ -2629,7 +2629,7 @@
           "acquisitions"
         ],
         "type": "object",
-        "title": "InitTaskConvertNd2SingleImage"
+        "title": "ConvertNd2ImageInitTask"
       },
       "args_schema_parallel": {
         "$defs": {
@@ -3224,12 +3224,12 @@
           "zarr_url": {
             "title": "Zarr Url",
             "type": "string",
-            "description": "URL to the OME-Zarr file."
+            "description": "URL to the OME-Zarr image to populate."
           },
           "init_args": {
             "$ref": "#/$defs/ConvertParallelInitArgs",
             "title": "Init Args",
-            "description": "Arguments for the compute task."
+            "description": "Arguments from the init task."
           }
         },
         "required": [
@@ -3237,7 +3237,7 @@
           "init_args"
         ],
         "type": "object",
-        "title": "ComputeTaskSingleImage"
+        "title": "SingleImageComputeTask"
       }
     }
   ],

@@ -52,20 +52,20 @@ dev = [
     "devtools",
     "hatch",
     "pytest",
+    "pytest-cov",
     "requests",
     "jsonschema",
     "ruff",
+    "ty",
     "pre-commit",
-    "pytest-cov",
-    "xmltodict",
 ]
-test = ["pytest", "pytest-cov", "devtools", "jsonschema"]
+test = ["pytest", "pytest-cov", "devtools", "jsonschema", "pyyaml", "requests"]
 docs = ["mkdocs-material", "mike"]
 
 # https://docs.astral.sh/ruff
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py311"
 src = ["src"]
 
 # https://docs.astral.sh/ruff/rules
@@ -83,7 +83,7 @@ select = [
     "B",    # flake8-bugbear
     "A001", # flake8-builtins
     "RUF",  # ruff-specific rules
-    "TCH",  # flake8-type-checking
+    "TC",   # flake8-type-checking
     "TID",  # flake8-tidy-imports
 ]
 ignore = [
@@ -105,22 +105,28 @@ python = ".pixi/envs/dev"
 
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "8.0"
 testpaths = ["tests"]
-# The filterwarnings option 
-# caused some unexpected behavior in the tests
-# so it was commented out
-#filterwarnings = [
-#    "error",
-#    #"ignore::FutureWarning",
-#    #"ignore::DeprecationWarning",
-#]
 addopts = [
-    "-vv",
     "--color=yes",
     "--cov",
     "--cov-report=term-missing",
     "--cov-report=xml",
+]
+
+[tool.coverage.run]
+source = ["fractal_nd2_converters"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@overload",
+    "except ImportError",
+    "\\.\\.\\.",
+    "raise NotImplementedError()",
+    "pass",
 ]
 
 [tool.pixi.workspace]
@@ -139,5 +145,7 @@ dev = { features = ["dev"], solve-group = "default" }
 test = { features = ["test"], solve-group = "default" }
 docs = { features = ["docs"], solve-group = "default" }
 
-# Required Python version and dependencies
-[tool.pixi.tasks]
+[tool.pixi.feature.dev.tasks]
+ruff-fix-imports = { cmd = "ruff check --select I --fix" }
+ruff = { cmd = "ruff format", depends-on = ["ruff-fix-imports"] }
+test = { cmd = "pytest", depends-on = ["ruff"] }

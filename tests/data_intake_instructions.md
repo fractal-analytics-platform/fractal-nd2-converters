@@ -10,8 +10,8 @@ New extended test datasets exist but are not yet formatted to match the naming c
 
 | Converter | Init Task | Compute Task | Dataset list in `test_nd2_extended.py` | Test function |
 |---|---|---|---|---|
-| ND2 plate | `init_task_convert_nd2_plate` | `compute_task_image_in_plate` | `_PLATE_DATASETS` | `test_nd2_plate_extended` |
-| ND2 single image | `init_task_convert_nd2_single_image` | `compute_task_single_image` | `_SINGLE_IMAGE_DATASETS` | `test_nd2_single_image_extended` |
+| ND2 plate | `nd2_plate/convert_nd2_plate_init_task` | `common/image_in_plate_compute_task` | `_PLATE_DATASETS` | `test_nd2_plate_extended` |
+| ND2 single image | `nd2_image/convert_nd2_image_init_task` | `common/single_image_compute_task` | `_SINGLE_IMAGE_DATASETS` | `test_nd2_single_image_extended` |
 
 Both converters live in `tests/test_nd2_extended.py`. The `data-extended` subfolder is always `Nikon-ND2/`.
 

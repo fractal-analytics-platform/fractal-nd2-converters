@@ -7,11 +7,14 @@ try:
 except PackageNotFoundError:
     __version__ = "uninstalled"
 
-from fractal_nd2_converters._nd2_utils import (
+from fractal_nd2_converters.nd2_image import (
     ND2ImageAcquisitionModel,
-    ND2PlateAcquisitionModel,
+    convert_nd2_single_image,
 )
-from fractal_nd2_converters.api import convert_nd2_plate, convert_nd2_single_image
+from fractal_nd2_converters.nd2_plate import (
+    ND2PlateAcquisitionModel,
+    convert_nd2_plate,
+)
 
 __all__ = [
     "ND2ImageAcquisitionModel",

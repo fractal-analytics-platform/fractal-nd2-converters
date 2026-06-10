@@ -5,7 +5,7 @@ on:
     branches:
       - main
     tags:
-      - "*"
+      - "v*.*.*"
   pull_request:
   workflow_dispatch:
   release:
@@ -15,7 +15,7 @@ jobs:
   tests:
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13", "3.14"]
     name: "Core, Python ${{ matrix.python-version }}, ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
@@ -76,10 +76,10 @@ jobs:
           python -m pip install build
           python -m build
 
-      - name: 🚢 Publish to PyPI
-        # TODO remove the "if: false" line when the package is ready for pypi release
-        if: false
-        uses: pypa/gh-action-pypi-publish@release/v1
+      # TODO: Enable the PyPI release once a trusted publisher is configured for
+      # the project (https://docs.pypi.org/trusted-publishers/).
+      # - name: 🚢 Publish to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
 
       - uses: softprops/action-gh-release@v2
         with:
