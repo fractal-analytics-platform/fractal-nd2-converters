@@ -45,6 +45,4 @@ def compute_task_single_image(
 if __name__ == "__main__":
     from fractal_task_tools.task_wrapper import run_fractal_task
 
-    run_fractal_task(
-        task_function=compute_task_single_image, logger_name=logger.name
-    )
+    run_fractal_task(task_function=compute_task_single_image, logger_name=logger.name)

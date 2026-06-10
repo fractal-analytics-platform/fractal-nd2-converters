@@ -24,8 +24,8 @@ authors = [{ name = "Flurin Sturzenegger", email = "st.flurin@gmail.com" }]
 requires-python = ">=3.11,<3.15"
 
 dependencies = [
-    "ome-zarr-converters-tools>=0.7.1,<0.8.0",
-    "fractal-task-tools>=0.4.0,<0.5.0",
+    "ome-zarr-converters-tools>=0.9.0,<0.10.0",
+    "fractal-task-tools>=0.5.0,<0.6.0",
     "nd2",
     "xarray",
 ]
@@ -86,6 +86,10 @@ ignore = [
 docstring-code-format = true
 docstring-code-line-length = 89
 skip-magic-trailing-comma = false # default is false
+
+[tool.ty.environment]
+python = ".pixi/envs/dev"
+
 
 [tool.pytest.ini_options]
 minversion = "7.0"

@@ -2,6 +2,7 @@
 
 import logging
 import re
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -18,18 +19,27 @@ from ome_zarr_converters_tools import (
     SingleImage,
     Tile,
     TiledImage,
+    default_axes_builder,
     tiles_aggregation_pipeline,
 )
 from ome_zarr_converters_tools.models._loader import ImageLoaderInterface
 from pydantic import BaseModel, Field
 
-from fractal_nd2_converters.color_utils import wavelength_to_default_color
-
 logger = logging.getLogger(__name__)
 
 
-class ND2ImageAcquisitionModel(BaseModel):
-    """Model for Nikon ND2 single image acquisitions.
+class _BaseND2AcquisitionModel(BaseModel):
+    """Shared base for ND2 acquisition models."""
+
+    @property
+    def _sanitized_name(self) -> str:
+        """Get the sanitized name from the path."""
+        name = self.path.rstrip("/").split("/")[-1].split(".nd2")[0]
+        return re.sub(r"[^A-Za-z0-9\-_. ]", "_", name)
+
+
+class ND2ImageAcquisitionModel(_BaseND2AcquisitionModel):
+    """Model for Nikon ND2 non-plate acquisitions.
 
     Accepts a single .nd2 file or a folder of .nd2 files that do not
     follow a plate layout (no well information in filenames).
@@ -50,13 +60,6 @@ class ND2ImageAcquisitionModel(BaseModel):
     """
 
     @property
-    def _sanitized_name(self) -> str:
-        """Get the sanitized name from the path."""
-        name = self.path.rstrip("/").split("/")[-1].split(".nd2")[0]
-        # Replace characters not allowed in Zarr names
-        return re.sub(r"[^A-Za-z0-9\-_. ]", "_", name)
-
-    @property
     def normalized_image_name(self) -> str:
         """Get the normalized image name."""
         if self.image_name is not None:
@@ -75,7 +78,7 @@ class ND2ImageAcquisitionModel(BaseModel):
         return self.normalized_image_name
 
 
-class ND2PlateAcquisitionModel(BaseModel):
+class ND2PlateAcquisitionModel(_BaseND2AcquisitionModel):
     """Model for Nikon ND2 plate acquisitions.
 
     Accepts a folder of .nd2 files where each file corresponds to a well
@@ -84,7 +87,8 @@ class ND2PlateAcquisitionModel(BaseModel):
 
     path: str
     """
-    Path to the nd2 file, or a folder containing nd2 files.
+    Path to a folder containing nd2 files for each well. Each file must have
+    well information in its filename (e.g. WellB02_..., WellC03_...).
     """
     plate_name: str | None = None
     """
@@ -99,13 +103,6 @@ class ND2PlateAcquisitionModel(BaseModel):
     """
     Advanced acquisition options.
     """
-
-    @property
-    def _sanitized_name(self) -> str:
-        """Get the sanitized name from the path."""
-        name = self.path.rstrip("/").split("/")[-1].split(".nd2")[0]
-        # Replace characters not allowed in Zarr names
-        return re.sub(r"[^A-Za-z0-9\-_. ]", "_", name)
 
     @property
     def normalized_plate_name(self) -> str:
@@ -157,7 +154,17 @@ class nd2Loader(ImageLoaderInterface):
         if tile_data.dims != ("T", "C", "Z", "Y", "X"):
             tile_data = tile_data.transpose("T", "C", "Z", "Y", "X")
 
-        return tile_data.data.compute()
+        arr = tile_data.data.compute()
+        # Squeeze T=1 to align with default_axes_builder(is_time_series=False)
+        if arr.shape[0] == 1:
+            arr = arr[0]
+        return arr
+
+    def find_data_type(self, resource: Any = None) -> str:
+        """Return the dtype without loading the full array."""
+        path = f"{resource}/{self.file_path}" if resource else self.file_path
+        with nd2.ND2File(path) as f:
+            return str(f.dtype)
 
 
 class _ND2Metadata(BaseModel):
@@ -172,11 +179,22 @@ class _ND2Metadata(BaseModel):
     positions: list[tuple[str, float, float, int | None]]
 
 
-def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
+def _color_to_hex(color) -> str:
+    """Convert nd2 Color object to hex color string (e.g., '#0000FF')."""
+    return f"#{color.r:02X}{color.g:02X}{color.b:02X}"
+
+
+def _parse_nd2_metadata(
+    nd2_path: str | Path,
+    fov_name_override: str | None = None,
+) -> _ND2Metadata:
     """Parse metadata from an ND2 file.
 
     Args:
         nd2_path: Path to the .nd2 file.
+        fov_name_override: When provided and the file has no P dimension,
+            use this name instead of the default "FOV_0". Used when multiple
+            single-position files contribute to the same well.
 
     Returns:
         Parsed ND2 metadata including shapes, acquisition details,
@@ -192,9 +210,20 @@ def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
         # scale factors [um]/[px]
         scale_x = nd2file.voxel_size().x
         scale_z = nd2file.voxel_size().z
-        scale_t = 1  # TODO: read correctly from metadata
+
+        # t_spacing in seconds; read from TimeLoop when available
+        scale_t = 1.0
+        if shape_t > 1:
+            time_loops = [e for e in nd2file.experiment if e.type == "TimeLoop"]
+            if time_loops:
+                params = time_loops[0].parameters
+                if params.periodMs > 0:
+                    scale_t = params.periodMs / 1000.0
+                elif params.periodDiff.avg > 0:
+                    scale_t = params.periodDiff.avg / 1000.0
 
         # camera transformation matrix
+        # Note: this assumes the same transform applies to all channels
         transform = nd2file.metadata.channels[0].volume.cameraTransformationMatrix
         transform = np.array(transform).reshape(2, 2)
 
@@ -203,7 +232,7 @@ def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
             ChannelInfo(
                 channel_label=ch.channel.name,
                 wavelength_id=str(ch.channel.emissionLambdaNm),
-                colors=wavelength_to_default_color(float(ch.channel.emissionLambdaNm)),
+                color=_color_to_hex(ch.channel.color),
             )
             for ch in nd2file.metadata.channels
         ]
@@ -213,6 +242,7 @@ def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
             pixelsize=scale_x,
             z_spacing=scale_z,
             t_spacing=scale_t,
+            axes=default_axes_builder(is_time_series=shape_t > 1),
         )
 
         # Build per-position list
@@ -231,9 +261,14 @@ def _parse_nd2_metadata(nd2_path: str | Path) -> _ND2Metadata:
                 )
                 positions.append((f"FOV_{p}", xy[0], -xy[1], p))
         else:
+            fov_name = fov_name_override if fov_name_override is not None else "FOV_0"
             pnt = nd2file.frame_metadata(0).channels[0].position
+            xy = np.dot(
+                transform,
+                [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
+            )
             positions.append(
-                ("FOV_0", pnt.stagePositionUm.x, pnt.stagePositionUm.y, None)
+                (fov_name, xy[0], -xy[1], None)
             )
 
     return _ND2Metadata(
@@ -251,9 +286,10 @@ def _build_tiles(
     nd2_path: str | Path,
     collection: ImageInPlate | SingleImage,
     attributes: dict[str, AttributeType],
+    fov_name_override: str | None = None,
 ) -> list[Tile]:
     """Build tiles from nd2 file."""
-    meta = _parse_nd2_metadata(nd2_path)
+    meta = _parse_nd2_metadata(nd2_path, fov_name_override=fov_name_override)
 
     return [
         Tile(
@@ -419,7 +455,8 @@ def parse_nd2_plate_acquisition(
     """Parse nd2 plate acquisition and return list of tiled images.
 
     Each .nd2 file in the folder must have well information in its filename
-    (e.g. WellB02_...).
+    (e.g. WellB02_...). Multiple files per well are supported: each file
+    becomes a separate FOV within the well image.
 
     Args:
         acquisition_model: Acquisition input model containing path and options.
@@ -431,7 +468,8 @@ def parse_nd2_plate_acquisition(
     nd2_list = _get_nd2_files(acquisition_model.path)
     condition_table = acquisition_model.get_condition_table()
 
-    all_tiles = []
+    # Group files by well so we can detect multi-file wells.
+    well_files: dict[tuple[str, int], list[Path]] = defaultdict(list)
     for nd2_path in nd2_list:
         well_info = _parse_well_info(nd2_path)
         if well_info is None:
@@ -440,8 +478,10 @@ def parse_nd2_plate_acquisition(
                 "Well pattern (e.g. WellA01, WellB02)"
             )
             continue
+        well_files[well_info].append(nd2_path)
 
-        row, col = well_info
+    all_tiles = []
+    for (row, col), files in well_files.items():
         collection = ImageInPlate(
             plate_name=acquisition_model.normalized_plate_name,
             row=row,
@@ -455,12 +495,19 @@ def parse_nd2_plate_acquisition(
             acquisition=acquisition_model.acquisition_id,
         )
 
-        tiles = _build_tiles(
-            nd2_path=nd2_path,
-            collection=collection,
-            attributes=attributes,
-        )
-        all_tiles.extend(tiles)
+        multi_file_well = len(files) > 1
+        for i, nd2_path in enumerate(files):
+            # When multiple files share a well, single-position files would all
+            # get fov_name="FOV_0". Pass an explicit override so each file gets
+            # a distinct name (FOV_0, FOV_1, …).
+            fov_override = f"FOV_{i}" if multi_file_well else None
+            tiles = _build_tiles(
+                nd2_path=nd2_path,
+                collection=collection,
+                attributes=attributes,
+                fov_name_override=fov_override,
+            )
+            all_tiles.extend(tiles)
 
     logger.info(f"Built {len(all_tiles)} tiles")
 
