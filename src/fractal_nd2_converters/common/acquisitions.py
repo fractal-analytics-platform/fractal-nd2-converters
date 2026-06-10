@@ -10,6 +10,7 @@ import re
 from typing import Literal, Protocol, TypeVar
 
 import polars
+from fsspec.core import split_protocol
 from ome_zarr_converters_tools import (
     AttributeType,
     ConverterOptions,
@@ -37,7 +38,11 @@ class BaseAcquisitionModel(BaseModel):
     @property
     def _sanitized_name(self) -> str:
         """Get the sanitized name from the path."""
-        name = self.path.rstrip("/").split("/")[-1].split(".nd2")[0]
+        # Strip any remote-store protocol (e.g. ``s3://``) first, then split on
+        # both path separators so the basename is correct on every platform and
+        # for local and remote paths alike.
+        _, path = split_protocol(self.path)
+        name = re.split(r"[\\/]", path.rstrip("/\\"))[-1].split(".nd2")[0]
         return re.sub(r"[^A-Za-z0-9\-_. ]", "_", name)
 
 
