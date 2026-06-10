@@ -124,10 +124,23 @@ def _parse_nd2_metadata(
                 positions.append((f"FOV_{p}", xy[0], -xy[1], p))
         else:
             fov_name = fov_name_override if fov_name_override is not None else "FOV_0"
-            if not nd2file.metadata.channels:
-                raise ValueError("No channel metadata found in ND2 file")
-            channel = nd2file.metadata.channels[0]
-            pnt = channel.position  # type: ignore
+            if not nd2file.frame_metadata(0):
+                raise ValueError(
+                    f"No channel metadata found in frame metadata of {nd2_path}. "
+                    "Cannot determine position information for single-position file."
+                )
+            frame_meta = nd2file.frame_metadata(0)
+            if isinstance(frame_meta, dict):
+                raise ValueError(
+                    f"Unexpected frame metadata format in {nd2_path}: found dict, "
+                    "expected object with 'channels' attribute."
+                )
+            if not frame_meta.channels:
+                raise ValueError(
+                    f"No channel metadata found in frame metadata of {nd2_path}. "
+                    "Cannot determine position information for single-position file."
+                )
+            pnt = frame_meta.channels[0].position
             xy = np.dot(
                 transform,
                 [pnt.stagePositionUm.x, pnt.stagePositionUm.y],
