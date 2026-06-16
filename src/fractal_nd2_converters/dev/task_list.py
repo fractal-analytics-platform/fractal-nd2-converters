@@ -7,8 +7,8 @@ AUTHORS = "Flurin Sturzenegger"
 TASK_LIST = [
     ConverterCompoundTask(
         name="Convert Nikon ND2 Plate to OME-Zarr",
-        executable_init="init_task_convert_nd2_plate.py",
-        executable="compute_task_image_in_plate.py",
+        executable_init="nd2_plate/convert_nd2_plate_init_task.py",
+        executable="common/image_in_plate_compute_task.py",
         meta_init={"cpus_per_task": 1, "mem": 4000},
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Conversion",
@@ -22,8 +22,8 @@ TASK_LIST = [
     ),
     ConverterCompoundTask(
         name="Convert Nikon ND2 Image to OME-Zarr",
-        executable_init="init_task_convert_nd2_single_image.py",
-        executable="compute_task_single_image.py",
+        executable_init="nd2_image/convert_nd2_image_init_task.py",
+        executable="common/single_image_compute_task.py",
         meta_init={"cpus_per_task": 1, "mem": 4000},
         meta={"cpus_per_task": 1, "mem": 4000},
         category="Conversion",

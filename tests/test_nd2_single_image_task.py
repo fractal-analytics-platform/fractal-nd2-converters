@@ -2,12 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from fractal_nd2_converters.compute_task_single_image import (
-    compute_task_single_image,
-)
-from fractal_nd2_converters.init_task_convert_nd2_single_image import (
-    init_task_convert_nd2_single_image,
-)
+from fractal_nd2_converters import convert_nd2_single_image
 
 from .utils import DATA_DIR, SNAPSHOT_DIR, run_converter_test
 
@@ -41,9 +36,8 @@ def test_nd2_single_image(
 ):
     run_converter_test(
         tmp_path=tmp_path,
-        init_task_fn=init_task_convert_nd2_single_image,
-        init_task_kwargs=init_task_kwargs,
-        compute_task_fn=compute_task_single_image,
+        api_fn=convert_nd2_single_image,
+        api_kwargs=init_task_kwargs,
         snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
@@ -75,9 +69,8 @@ def test_nd2_folder(
 ):
     run_converter_test(
         tmp_path=tmp_path,
-        init_task_fn=init_task_convert_nd2_single_image,
-        init_task_kwargs=init_task_kwargs,
-        compute_task_fn=compute_task_single_image,
+        api_fn=convert_nd2_single_image,
+        api_kwargs=init_task_kwargs,
         snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
