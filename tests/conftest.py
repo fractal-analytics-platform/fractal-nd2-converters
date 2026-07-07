@@ -9,6 +9,11 @@ import pytest
 from ome_zarr_converters_tools import ConverterOptions, OmeZarrOptions
 from ome_zarr_converters_tools.models._converter_options import BackendType
 
+# Load the shared snapshot-testing plugin: the --update-snapshots / --extended
+# options, the `extended` marker and its skip behaviour, and the
+# `update_snapshots` fixture.
+pytest_plugins = ["ome_zarr_converters_tools.testing.plugin"]
+
 logger = logging.getLogger(__name__)
 
 _DATA_EXTENDED_DIR = Path(__file__).parent / "data-extended" / "Nikon-ND2"
@@ -61,6 +66,14 @@ def _extract_extended_data() -> None:
         vendor_dir = raw_dir / zip_name.replace(".zip", "")
         if vendor_dir.exists():
             vendor_dir.rename(target_dir)
+        # Nikon "Jobs" exports wrap the .nd2 files in an inner timestamp folder;
+        # hoist them so files live directly under the canonical dir.
+        children = [c for c in target_dir.iterdir() if c.name != ".DS_Store"]
+        if len(children) == 1 and children[0].is_dir():
+            inner = children[0]
+            for f in inner.iterdir():
+                f.rename(target_dir / f.name)
+            inner.rmdir()
 
     for zip_name, file_map in LOCAL_ZIPS_SPLIT.items():
         zip_path = _DATA_EXTENDED_DIR / zip_name
@@ -87,40 +100,14 @@ def _extract_extended_data() -> None:
             shutil.rmtree(tmp_dir)
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--update-snapshots",
-        action="store_true",
-        default=False,
-        help="Regenerate assertion snapshot YAMLs",
-    )
-    parser.addoption(
-        "--extended",
-        action="store_true",
-        default=False,
-        help="Run extended tests requiring large local test datasets",
-    )
-
-
 def pytest_configure(config):
-    """Prepare test data and register markers before test collection."""
-    config.addinivalue_line(
-        "markers", "extended: mark test as requiring the extended test datasets"
-    )
+    """Extract local extended test data before collection.
+
+    The --update-snapshots / --extended options, the `extended` marker and its
+    skip behaviour, and the `update_snapshots` fixture are provided by the
+    ome_zarr_converters_tools.testing pytest plugin.
+    """
     _extract_extended_data()
-
-
-def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--extended"):
-        skip_marker = pytest.mark.skip(reason="Pass --extended to run extended tests")
-        for item in items:
-            if "extended" in item.keywords:
-                item.add_marker(skip_marker)
-
-
-@pytest.fixture
-def update_snapshots(request):
-    return request.config.getoption("--update-snapshots")
 
 
 @pytest.fixture

@@ -152,7 +152,8 @@ Construct the canonical name: `hcs_{W}w{P}p{C}c{Z}z{T}t_{Descriptor}` or `img_{P
 ### Step 4 — Rename and flatten the raw directory
 
 - Rename `tests/data-extended/Nikon-ND2/raw/{tmp_name}/` → `tests/data-extended/Nikon-ND2/raw/{canonical_name}/`
-- If the acquisition subfolder has unnecessary nesting (e.g., a single intermediate directory containing all the actual files), move the contents up one level so acquisition files live directly inside `raw/{canonical_name}/{acq_subfolder}/`.
+- **Fully flatten any nesting.** Nikon "Jobs" exports wrap the `.nd2` files in an inner timestamp folder (e.g. `20250506_123408_112/`). Move the `.nd2` files up so they live **directly** inside `raw/{canonical_name}/` — i.e. `raw/{canonical_name}/*.nd2`, with no intermediate subfolder. The plate converter names the plate after the folder it is pointed at, so a leftover timestamp subfolder would produce a non-standard plate name (`20250506_….zarr`) instead of `{canonical_name}.zarr`.
+- Because the acquisition files now sit directly under `raw/{canonical_name}/`, the dataset tuple's `acq_folder` element is `""` (the path resolves to `RAW_DIR / dataset`).
 
 ---
 
@@ -201,9 +202,10 @@ In `tests/test_nd2_extended.py`:
 - Delete the old snapshot: `tests/data-extended/Nikon-ND2/snapshots/{tmp_name}.yaml`
 - Delete the old output dir: `tests/data-extended/Nikon-ND2/output/{tmp_name}/`
 
-The updated tuple:
+The updated tuple (for a flattened plate dataset the middle `acq_folder` element is
+`""`; for a single-image dataset it is the `.nd2` filename):
 ```python
-("{canonical_name}", "{acq_subfolder}", "{canonical_name}"),
+("{canonical_name}", "", "{canonical_name}"),
 ```
 
 Re-run with the canonical name:

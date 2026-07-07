@@ -1,10 +1,11 @@
 from pathlib import Path
 
 import pytest
+from ome_zarr_converters_tools.testing import run_converter_test
 
 from fractal_nd2_converters import convert_nd2_plate
 
-from .utils import DATA_DIR, SNAPSHOT_DIR, run_converter_test
+from .utils import DATA_DIR, SNAPSHOT_DIR
 
 RAW_DIR = DATA_DIR / "raw"
 _PLATE_DATA = RAW_DIR / "hcs_3w2p2c1z1t_SplitP"
@@ -37,7 +38,7 @@ def test_nd2_plate(
         tmp_path=tmp_path,
         api_fn=convert_nd2_plate,
         api_kwargs=init_task_kwargs,
-        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
+        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.json",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
     )

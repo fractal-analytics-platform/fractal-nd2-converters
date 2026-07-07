@@ -14,5 +14,10 @@
 - Remove `_setup_single_image.py` and its import: `ome-zarr-converters-tools>=0.10.0` now ships
   a built-in `setup_singleimage` handler for `SingleImage` collections, making the local copy
   redundant.
-- Bump to `ome-zarr-converters-tools>=0.10.0,<0.11.0`.
+- Bump to `ome-zarr-converters-tools>=0.10.4,<0.11.0`.
+- Migrate to the centralized snapshot-testing harness from
+  `ome_zarr_converters_tools.testing`: drop the local `tests/utils.py` snapshot engine in favour
+  of the shared `run_converter_test`, load the shared pytest plugin via `pytest_plugins` in
+  `conftest.py`, and store snapshots as JSON instead of YAML. Drop the now-unused `devtools` and
+  `pyyaml` test dependencies.
 - Rename `nd2_utils.py` to `_nd2_utils.py` to signal private implementation.
