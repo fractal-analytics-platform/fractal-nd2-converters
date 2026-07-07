@@ -1,20 +1,21 @@
 from pathlib import Path
 
 import pytest
+from ome_zarr_converters_tools.testing import run_converter_test
 
 from fractal_nd2_converters import convert_nd2_plate, convert_nd2_single_image
 
-from .utils import DATA_EXTENDED_DIR, run_converter_test
+from .utils import DATA_EXTENDED_DIR
 
 RAW_DIR = DATA_EXTENDED_DIR / "raw"
 SNAPSHOT_DIR = DATA_EXTENDED_DIR / "snapshots"
 
 _PLATE_DATASETS = [
-    ("hcs_3w2p2c1z1t", "20250506_123408_112", "hcs_3w2p2c1z1t"),
-    ("hcs_3w2p2c1z6t", "20250506_124539_026", "hcs_3w2p2c1z6t"),
-    ("hcs_3w2p2c3z1t", "20250506_124350_001", "hcs_3w2p2c3z1t"),
-    ("hcs_3w2p2c1z1t_SplitP", "20250506_123741_693", "hcs_3w2p2c1z1t_SplitP"),
-    ("hcs_3w6p2c1z1t_10overlap", "20250506_124144_018", "hcs_3w6p2c1z1t_10overlap"),
+    ("hcs_3w2p2c1z1t", "", "hcs_3w2p2c1z1t"),
+    ("hcs_3w2p2c1z6t", "", "hcs_3w2p2c1z6t"),
+    ("hcs_3w2p2c3z1t", "", "hcs_3w2p2c3z1t"),
+    ("hcs_3w2p2c1z1t_SplitP", "", "hcs_3w2p2c1z1t_SplitP"),
+    ("hcs_3w6p2c1z1t_10overlap", "", "hcs_3w6p2c1z1t_10overlap"),
 ]
 _SINGLE_IMAGE_DATASETS = [
     ("img_1p1c1z1t_noND", "img_1p1c1z1t_noND.nd2", "img_1p1c1z1t_noND"),
@@ -62,7 +63,7 @@ def test_nd2_plate_extended(
         tmp_path=tmp_path,
         api_fn=convert_nd2_plate,
         api_kwargs=init_task_kwargs,
-        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
+        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.json",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
     )
@@ -97,7 +98,7 @@ def test_nd2_single_image_extended(
         tmp_path=tmp_path,
         api_fn=convert_nd2_single_image,
         api_kwargs=init_task_kwargs,
-        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
+        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.json",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
         output_type="single_image",

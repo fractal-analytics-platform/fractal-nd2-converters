@@ -1,0 +1,298 @@
+{
+  "images": {
+    "hcs_3w2p2c1z1t_SplitP_WellB02_PointB02_0000_ChannelSD DAPI- EM_SD GFP - EM_Seq0000.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 123.774405,
+                "std": 68.585387,
+                "min": 75.0,
+                "max": 1456.0,
+                "hash": "db264a45b5d6e8b8ea45db8c67c5af90918eec50f0d1be8df0d573ab5d52b8a8"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    },
+    "hcs_3w2p2c1z1t_SplitP_WellB02_PointB02_0001_ChannelSD DAPI- EM_SD GFP - EM_Seq0001.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 127.833519,
+                "std": 90.946952,
+                "min": 75.0,
+                "max": 2427.0,
+                "hash": "65c5f08ebd4c1bd3732407d835040063606db6ffbd44e606b8dbdbb77384f0fe"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    },
+    "hcs_3w2p2c1z1t_SplitP_WellB03_PointB03_0000_ChannelSD DAPI- EM_SD GFP - EM_Seq0002.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 113.091954,
+                "std": 14.196338,
+                "min": 75.0,
+                "max": 329.0,
+                "hash": "90d3f14a869677adc06ac6c729eb9ff73b616fb03a1fc150afe1c793e6900d6f"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    },
+    "hcs_3w2p2c1z1t_SplitP_WellB03_PointB03_0001_ChannelSD DAPI- EM_SD GFP - EM_Seq0003.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 111.041825,
+                "std": 12.033298,
+                "min": 73.0,
+                "max": 338.0,
+                "hash": "1cbe0aee180e0ace235bea5a6624090d4051db5f5cd5dbecf180214b6babde30"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    },
+    "hcs_3w2p2c1z1t_SplitP_WellC02_PointC02_0000_ChannelSD DAPI- EM_SD GFP - EM_Seq0004.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 141.855775,
+                "std": 117.215047,
+                "min": 75.0,
+                "max": 2279.0,
+                "hash": "e8f99e130fea5ae7820640eb541c97c26217a9c80eb793dfd5602cbdc000f9fe"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    },
+    "hcs_3w2p2c1z1t_SplitP_WellC02_PointC02_0001_ChannelSD DAPI- EM_SD GFP - EM_Seq0005.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 148.34905,
+                "std": 122.387269,
+                "min": 74.0,
+                "max": 2781.0,
+                "hash": "df139ebd2cc0510217ad733f0fd9cdccf2239be54ed1e6c32f7368fc6615e68d"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    }
+  }
+}

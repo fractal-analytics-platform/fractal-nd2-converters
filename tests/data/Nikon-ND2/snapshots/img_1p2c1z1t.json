@@ -1,0 +1,53 @@
+{
+  "images": {
+    "img_1p2c1z1t.zarr": {
+      "axes": [
+        "c",
+        "z",
+        "y",
+        "x"
+      ],
+      "shape": [
+        2,
+        1,
+        512,
+        1024
+      ],
+      "pixelsize": [
+        1.0,
+        1.0,
+        0.66769911111418,
+        0.66769911111418
+      ],
+      "channel_labels": [
+        "SD DAPI- EM",
+        "SD GFP - EM"
+      ],
+      "wavelength_ids": [
+        "438.0",
+        "511.0"
+      ],
+      "types": {
+        "is_3D": false
+      },
+      "attributes": {},
+      "tables": {
+        "well_ROI_table": {
+          "rois": {
+            "image": {
+              "slice_repr": "[x: 0.0->1024.0, y: 0.0->512.0, z: 0.0->1.0]",
+              "finger_print": {
+                "mean": 1927.783506,
+                "std": 1861.384175,
+                "min": 83.0,
+                "max": 16528.0,
+                "hash": "923210a1292d50ce85610544dbfc4df09905c3763fb8aee48fc7c739b4476261"
+              },
+              "yx_origin": null
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,10 +1,11 @@
 from pathlib import Path
 
 import pytest
+from ome_zarr_converters_tools.testing import run_converter_test
 
 from fractal_nd2_converters import convert_nd2_single_image
 
-from .utils import DATA_DIR, SNAPSHOT_DIR, run_converter_test
+from .utils import DATA_DIR, SNAPSHOT_DIR
 
 RAW_DIR = DATA_DIR / "raw"
 _SINGLE_FILE = RAW_DIR / "img_1p2c1z1t.nd2"
@@ -38,7 +39,7 @@ def test_nd2_single_image(
         tmp_path=tmp_path,
         api_fn=convert_nd2_single_image,
         api_kwargs=init_task_kwargs,
-        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
+        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.json",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
         output_type="single_image",
@@ -71,7 +72,7 @@ def test_nd2_folder(
         tmp_path=tmp_path,
         api_fn=convert_nd2_single_image,
         api_kwargs=init_task_kwargs,
-        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.yaml",
+        snapshot_path=SNAPSHOT_DIR / f"{snapshot_name}.json",
         update_snapshots=update_snapshots,
         converter_options=converter_options,
         output_type="single_image",
