@@ -23,5 +23,5 @@ The following input layout is supported. (The names in curly braces `{}` can be 
 	- Note:
 		- This works for files generated with the standard plate acquisition JOBS script at the ZMB Nikon Spinning Disk
 		- The filenames MUST contain `Well` followed by the well name. Valid options for well names are e.g. `A1`, `A01`
-		- If there are multiple files corresponding to the same well, they will be treated as separate positions withing the well
+		- If there are multiple files corresponding to the same well, they will be treated as separate positions within the well
 		- If there are other .nd2 files in the folder that do not adhere to this naming convention, they will be ignored
